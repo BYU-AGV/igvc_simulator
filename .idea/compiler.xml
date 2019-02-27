@@ -9,8 +9,8 @@
         <module name="igvc_simulator" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="igvc_simulator" target="1.5" />
+    <bytecodeTargetLevel target="11">
+      <module name="igvc_simulator" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>
