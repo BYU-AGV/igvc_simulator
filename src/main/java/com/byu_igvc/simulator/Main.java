@@ -1,12 +1,24 @@
 package com.byu_igvc.simulator;
 
+import com.byu_igvc.core.render.OpenGLRenderingEngine;
 import com.byu_igvc.logger.LogSaver;
 import com.byu_igvc.logger.Logger;
 
+import org.lwjgl.*;
+
+import java.awt.*;
+
 public class Main {
+    private long window;
+    private Color color;
+
     public static void main(String...args) {
         initLogger();
         Logger.fine("Setup logger");
+        Main main = new Main();
+        main.color = new Color(0x283593);
+        main.run();
+        Logger.flush();
     }
 
     private static void initLogger() {
@@ -14,5 +26,13 @@ public class Main {
         Logger.setLogClass(true);
         Logger.setLogLevel(Logger.LEVEL.FINE);
         Logger.setLogSaver(new LogSaver("logs"));
+    }
+
+    public void run() {
+        Logger.fine("Hello from LWJGL " + Version.getVersion() + "!");
+        Simulator simulator = new Simulator();
+        simulator.setRenderEngine(new OpenGLRenderingEngine());
+        simulator.init();
+        simulator.simulate();
     }
 }
