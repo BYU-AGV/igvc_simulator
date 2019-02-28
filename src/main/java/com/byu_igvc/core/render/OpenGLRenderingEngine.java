@@ -18,7 +18,7 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class OpenGLRenderingEngine implements IRenderEngine {
-    private long window;
+    private static long window;
     private Color backgroundColor;
     private String title = "OpenGL Rendering Engine";
     private static float width;
@@ -26,6 +26,10 @@ public class OpenGLRenderingEngine implements IRenderEngine {
 
     public OpenGLRenderingEngine() {
         backgroundColor = new Color(0x052059);
+    }
+
+    public static long getWindow() {
+        return window;
     }
 
     @Override
@@ -42,7 +46,7 @@ public class OpenGLRenderingEngine implements IRenderEngine {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        window = glfwCreateWindow(640, 400, title, NULL, NULL);
+        OpenGLRenderingEngine.window = glfwCreateWindow(640, 400, title, NULL, NULL);
         OpenGLRenderingEngine.width = 640;
         OpenGLRenderingEngine.height = 400;
         if (window == NULL)
