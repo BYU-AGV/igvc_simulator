@@ -11,6 +11,9 @@ import com.byu_igvc.core.scene.Camera;
 import com.byu_igvc.core.scene.Model;
 import com.byu_igvc.core.scene.Position;
 import com.byu_igvc.logger.Logger;
+import glm.vec._3.Vec3;
+
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Simulator implements IWorld {
     private IRenderEngine renderEngine;
@@ -33,7 +36,6 @@ public class Simulator implements IWorld {
         camera = new Camera();
         inputManager = new InputManager();
         inputManager.init();
-        registerEventListeners();
     }
 
     @Override
@@ -44,34 +46,29 @@ public class Simulator implements IWorld {
     @Override
     public void simulate() {
         while (!renderEngine.shouldShutDown()) {
-            renderEngine.startFrame();
-            renderEngine.renderModel(camera, model);
-            renderEngine.updateWindow();
+            tick();
+            render();
         }
         renderEngine.shutdown();
     }
 
     @Override
-    public void shutdown() {
-        renderEngine.shutdown();
+    public void tick() {
+        if (inputManager.isKeyDown(GLFW_KEY_D))
+            camera.moveCamera(new Vec3(0.05, 0, 0));
+        if (inputManager.isKeyDown(GLFW_KEY_A))
+            camera.moveCamera(new Vec3(-0.05, 0, 0));
     }
 
-    private void registerEventListeners() {
-        inputManager.registerListener(KeyboardEvent.class, new KeyboardListener() {
-            @Override
-            public void keyPressed(int key) {
-                Logger.fine("Key pressed: " + key);
-            }
+    @Override
+    public void render() {
+        renderEngine.startFrame();
+        renderEngine.renderModel(camera, model);
+        renderEngine.updateWindow();
+    }
 
-            @Override
-            public void keyReleased(int key) {
-                Logger.fine("Key released: " + key);
-            }
-
-            @Override
-            public void keyTyped(int key) {
-                Logger.fine("Key typed: " + key);
-            }
-        });
+    @Override
+    public void shutdown() {
+        renderEngine.shutdown();
     }
 }

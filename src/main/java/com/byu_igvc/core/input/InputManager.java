@@ -21,9 +21,11 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class InputManager implements IEngine {
     private HashMap<Class<? extends IEvent>, List<IListener<IEvent>>> listeners;
+    private HashMap<Integer, Boolean> keyMap;
 
     public InputManager() {
         listeners = new HashMap<>();
+        keyMap = new HashMap<>();
     }
 
     @Override
@@ -33,8 +35,10 @@ public class InputManager implements IEngine {
             public void invoke(long window, int key, int scanCode, int action, int mods) {
                 if (action == GLFW_PRESS) {
                     triggerEvent(KeyboardEvent.class, new KeyboardEvent(KeyboardEvent.EventType.PRESSED, key));
+                    keyMap.put(key, true);
                 } else if (action == GLFW_RELEASE) {
                     triggerEvent(KeyboardEvent.class, new KeyboardEvent(KeyboardEvent.EventType.RELEASED, key));
+                    keyMap.put(key, false);
                 }
             }
         };
@@ -66,16 +70,6 @@ public class InputManager implements IEngine {
 
     }
 
-    /**
-     * Gets the events that are of the same type
-     * @param event event to be triggered
-     */
-    private void triggerKeyboardEvent(KeyboardEvent event) {
-        if (listeners.containsKey(KeyboardListener.class))
-            for (IListener<IEvent> listener : listeners.get(KeyboardListener.class))
-                    listener.handleEvent(event);
-    }
-
     private <T extends IEvent> void triggerEvent(Class<T> tClass, T event) {
         if (listeners.containsKey(tClass))
             for (IListener<IEvent> listener : listeners.get(tClass))
@@ -87,5 +81,9 @@ public class InputManager implements IEngine {
             listeners.put(tClass, new ArrayList<>());
 
         listeners.get(tClass).add(t);
+    }
+
+    public boolean isKeyDown(int key) {
+        return keyMap.getOrDefault(key, false);
     }
 }

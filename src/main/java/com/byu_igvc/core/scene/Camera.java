@@ -26,4 +26,8 @@ public class Camera {
     public Mat4 getViewMatrix() {
         return Glm.lookAt(position, forward, up, new Mat4());
     }
+
+    public void moveCamera(Vec3 vec3) {
+        this.position.add(vec3);
+    }
 }

@@ -1,7 +1,7 @@
 <component name="libraryTable">
-  <library name="Maven: org.lwjgl:lwjgl-lmdb:natives-windows:3.2.1">
+  <library name="Maven: org.lwjgl:lwjgl-lmdb:natives-linux:3.2.1">
     <CLASSES>
-      <root url="jar://$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-lmdb/3.2.1/lwjgl-lmdb-3.2.1-natives-windows.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-lmdb/3.2.1/lwjgl-lmdb-3.2.1-natives-linux.jar!/" />
     </CLASSES>
     <JAVADOC>
       <root url="jar://$MAVEN_REPOSITORY$/org/lwjgl/lwjgl-lmdb/3.2.1/lwjgl-lmdb-3.2.1-javadoc.jar!/" />
