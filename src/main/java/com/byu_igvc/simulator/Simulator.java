@@ -1,6 +1,8 @@
 package com.byu_igvc.simulator;
 
 import com.byu_igvc.core.input.InputManager;
+import com.byu_igvc.core.input.event.CursorMoveEvent;
+import com.byu_igvc.core.input.listener.CursorMoveListener;
 import com.byu_igvc.core.physics.IWorld;
 import com.byu_igvc.core.render.IRenderEngine;
 import com.byu_igvc.core.render.Mesh;
@@ -8,6 +10,7 @@ import com.byu_igvc.core.render.Shader;
 import com.byu_igvc.core.scene.Camera;
 import com.byu_igvc.core.scene.Model;
 import com.byu_igvc.core.scene.Position;
+import com.byu_igvc.logger.Logger;
 import glm.vec._3.Vec3;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -36,6 +39,13 @@ public class Simulator implements IWorld {
         camera = new Camera();
         inputManager = new InputManager();
         inputManager.init();
+        inputManager.registerListener(CursorMoveEvent.class, new CursorMoveListener() {
+            @Override
+            public void cursorMove(double x, double y) {
+//                Logger.fine("Mouse x: " + x + ", Mouse y: " + y);
+                camera.updateMatricesFromInput(x, y, 0.0016);
+            }
+        });
     }
 
     @Override
@@ -58,6 +68,8 @@ public class Simulator implements IWorld {
             camera.moveCamera(new Vec3(0.05, 0, 0));
         if (inputManager.isKeyDown(GLFW_KEY_A))
             camera.moveCamera(new Vec3(-0.05, 0, 0));
+
+        inputManager.tick();
     }
 
     @Override

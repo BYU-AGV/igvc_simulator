@@ -1,5 +1,6 @@
 package com.byu_igvc.core.input;
 
+import com.byu_igvc.core.input.event.CursorMoveEvent;
 import com.byu_igvc.core.input.event.IEvent;
 import com.byu_igvc.core.input.event.KeyboardEvent;
 import com.byu_igvc.core.input.event.MouseButtonEvent;
@@ -53,7 +54,7 @@ public class InputManager implements IEngine {
         GLFWCursorPosCallback cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xDelta, double yDelta) {
-
+                triggerEvent(CursorMoveEvent.class, new CursorMoveEvent(xDelta, yDelta));
             }
         };
         glfwSetCursorPosCallback(OpenGLRenderingEngine.getWindow(), cursorPosCallback);
@@ -63,6 +64,8 @@ public class InputManager implements IEngine {
 
             }
         });
+
+        glfwSetInputMode(OpenGLRenderingEngine.getWindow(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     @Override
@@ -85,5 +88,11 @@ public class InputManager implements IEngine {
 
     public boolean isKeyDown(int key) {
         return keyMap.getOrDefault(key, false);
+    }
+
+    public void tick() {
+//        long xPos = 0, yPos = 0;
+//        nglfwGetCursorPos(OpenGLRenderingEngine.getWindow(), xPos, yPos);
+//        triggerEvent(CursorMoveEvent.class, new CursorMoveEvent(xPos, yPos));
     }
 }
