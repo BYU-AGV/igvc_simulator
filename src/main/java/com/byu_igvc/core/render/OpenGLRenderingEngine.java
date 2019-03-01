@@ -87,14 +87,11 @@ public class OpenGLRenderingEngine implements IRenderEngine {
         glUseProgram(mesh.getShader().getProgramID());
         Shader.setUniformMat4(mesh.getShader(), "mvp", modelViewProjection);
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, mesh.getVertexBuffer());
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glBindVertexArray(mesh.getVertexArrayID());
+//        glDrawElements(GL_TRIANGLES, mesh.getIndexSize(), GL_UNSIGNED_INT,0);
         glDrawArrays(GL_TRIANGLES, 0, mesh.getNumberOfVerticies());
 
-        // Unbinds everything
-        glDisableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
         glUseProgram(0);
     }
 
