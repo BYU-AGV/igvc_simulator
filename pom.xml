@@ -460,6 +460,21 @@
             <artifactId>glm</artifactId>
             <version>1.0.1</version>d
         </dependency>
+
+
+
+        <dependency>
+            <groupId>org.la4j</groupId>
+            <artifactId>la4j</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.joml</groupId>
+            <artifactId>joml</artifactId>
+            <version>1.9.13</version>
+        </dependency>
     </dependencies>
 
 

@@ -1,9 +1,10 @@
 package com.byu_igvc.core.render;
 
 import com.byu_igvc.core.scene.Camera;
-import com.byu_igvc.core.scene.Model;
+import com.byu_igvc.core.scene.model.AiModel;
+import com.byu_igvc.core.scene.model.Model;
 import com.byu_igvc.logger.Logger;
-import glm.mat._4.Mat4;
+import org.joml.Matrix4f;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
@@ -83,9 +84,9 @@ public class OpenGLRenderingEngine implements IRenderEngine {
     }
 
     @Override
-    public void renderMesh(Mesh mesh, Mat4 modelViewProjection) {
+    public void renderMesh(Mesh mesh, Matrix4f modelviewprojection) {
         glUseProgram(mesh.getShader().getProgramID());
-        Shader.setUniformMat4(mesh.getShader(), "mvp", modelViewProjection);
+        Shader.setUniformMat4(mesh.getShader(), "mvp", modelviewprojection);
 
         glBindVertexArray(mesh.getVertexArrayID());
 //        glDrawElements(GL_TRIANGLES, mesh.getIndexSize(), GL_UNSIGNED_INT,0);
@@ -97,8 +98,10 @@ public class OpenGLRenderingEngine implements IRenderEngine {
 
     @Override
     public void renderModel(Camera camera, Model model) {
-        Mat4 mvp = camera.getProjectionMatrix().mul(camera.getViewMatrix()).mul(new Mat4(1.0f));
-        renderMesh(model.getMesh(), mvp);
+        Matrix4f mvp = camera.getProjectionMatrix();
+//        camera.getViewMatrix();
+
+        renderMesh(model.getMesh(), mvp.mul(camera.getViewMatrix().mul(new Matrix4f())));
     }
 
     @Override

@@ -1,79 +1,92 @@
 package com.byu_igvc.core.scene;
 
 import com.byu_igvc.core.render.OpenGLRenderingEngine;
-import com.byu_igvc.logger.Logger;
 import glm.Glm;
 import glm.mat._4.Mat4;
-import glm.vec._3.Vec3;
-import jglm.Mat;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
+import org.lwjgl.BufferUtils;
+
+import java.nio.FloatBuffer;
 
 public class Camera {
-    Mat4 projection;
+    Matrix4f projection = new Matrix4f();
+    Matrix4f view = new Matrix4f();
 
-    Vec3 position;
-    Vec3 forward;
-    Vec3 up;
+    FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+    Vector3f pos;
+    Vector3f dir;
+    Vector3f right;
+    Vector3f up;
 
-    private double xOld = 0, yOld = 0;
-    private double pitch = 0;
-    private double yaw = 0;
-    private double mouseSpeed = 1;
-    double horizontalAngle = 0;
-    double verticalAngle = 0;
+    float xOffset = 0.0f;
+    float yOffset = 0.0f;
+
+    float sensitivity = 0.5f;
+    private double xOld = 0;
+    private double yOld = 0;
 
     public Camera() {
-        projection = Glm.perspective(45, OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.1f, 100.0f, new Mat4());
-        forward = new Vec3(0, 0, -1);
-        up = new Vec3(0, 1, 0);
-        position = new Vec3(0, 0, 3);
+        projection.setPerspective((float) Math.toRadians(45), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.01f, 1000f);
+        pos = new Vector3f(0, 0, 3);
+        dir = new Vector3f(0, 0, 1);
+        right = new Vector3f();
+        up = new Vector3f();
+       updateMatricesFromInput(0 ,0 ,0);
     }
 
-    public Mat4 getProjectionMatrix() {
-        return Glm.perspective(45, OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.1f, 100.0f, new Mat4());
+    /**
+     * This will get a projection matrix that will give perspective
+     * TODO must find out why the coordinate system is flipped. X and Y axises are flipped
+     * @return projection matrix
+     */
+    public Matrix4f getProjectionMatrix() {
+        return projection.setPerspective((float) Math.toRadians(45), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.01f, 1000f).rotateZ((float) Math.toRadians(-90));
     }
 
-    public Mat4 getViewMatrix() {
-//        return Glm.lookAt(new Vec3(0, 0, 3), new Vec3(0, 0, -1), new Vec3(0, 1, 0), new Mat4());
-//        return Glm.lookAt(position, Glm.add(position, forward), up, new Mat4());
-        return Glm.lookAt(position, forward, up, new Mat4());
+    /**
+     * Gets the view matrix
+     * @return
+     */
+    public Matrix4f getViewMatrix() {
+        return view.identity().rotateX(xOffset).rotateY(yOffset).translate(-pos.x, -pos.y, -pos.z);
     }
 
-    public void moveCamera(Vec3 vec3) {
-        this.position.add(vec3);
+    public void goForward() {
+        pos.add(dir);
+    }
+
+    public void goBackward() {
+        pos.sub(dir);
+    }
+
+    public void goLeft() {
+        pos.add(right);
+    }
+
+    public void goRight() {
+        pos.sub(right);
+    }
+
+    public void goUp() {
+        pos.add(up);
+    }
+
+    public void goDown() {
+        pos.sub(up);
     }
 
     public void updateMatricesFromInput(double x, double y, double deltatime) {
-
-        double xOffset = x - xOld;
-        double yOffset = yOld - y;
-
-        Logger.fine("Mouse x: " + xOffset + ", Mouse y: " + yOffset);
-
-        xOffset *= 0.05;
-        xOffset *= 0.05;
-
-        pitch += xOffset;
-        yaw += yOffset;
-
-        if(pitch > 89.0f)
-            pitch =  89.0f;
-        if(pitch < -89.0f)
-            pitch = -89.0f;
-
-        forward.set(new Vec3(
-                (Math.cos(Math.toRadians(pitch)) * Math.cos(Math.toRadians(yaw))),
-                Math.sin(Math.toRadians(pitch)),
-                (Math.cos(Math.toRadians(pitch)) * Math.sin(Math.toRadians(yaw)))
-        ));
-        Vec3 front = new Vec3();
-        front.x = (float) (Math.cos(Math.toRadians(pitch)) * Math.cos(Math.toRadians(yaw)));
-        front.y = (float) Math.sin(Math.toRadians(pitch));
-        front.z = (float) (Math.cos(Math.toRadians(pitch)) * Math.sin(Math.toRadians(yaw)));
-        forward = front.normalize();
-        Logger.fine("Forward: " + forward.toString());
-
+        xOffset += (xOld - x) * sensitivity * deltatime;
+        yOffset += (y - yOld) * sensitivity * deltatime;
 
         xOld = x;
         yOld = y;
+
+        view.identity().rotateY(yOffset).rotateX(xOffset).translate(-pos.x, -pos.y, -pos.z); // create view vector
+        view.positiveZ(dir).negate(); // Create direction vector
+        view.positiveY(right).negate(); // create right vector
+        view.positiveX(up).negate(); // create up vector
     }
 }

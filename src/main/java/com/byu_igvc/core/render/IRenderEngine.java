@@ -1,13 +1,12 @@
 package com.byu_igvc.core.render;
 
 import com.byu_igvc.core.scene.Camera;
-import com.byu_igvc.core.scene.Model;
-import com.byu_igvc.core.scene.Position;
-import glm.mat._4.Mat4;
+import com.byu_igvc.core.scene.model.Model;
+import org.joml.Matrix4f;
 
 public interface IRenderEngine extends IEngine{
     public void init();
-    public void renderMesh(Mesh mesh, Mat4 modelViewProjection);
+    public void renderMesh(Mesh mesh, Matrix4f mvp);
     public void renderModel(Camera camera, Model model);
     public void startFrame();
     public void updateWindow();

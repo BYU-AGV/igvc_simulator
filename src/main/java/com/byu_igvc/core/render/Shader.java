@@ -2,8 +2,11 @@ package com.byu_igvc.core.render;
 
 import com.byu_igvc.logger.Logger;
 import glm.mat._4.Mat4;
+import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 
 import java.io.IOException;
+import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -58,5 +61,17 @@ public class Shader {
     public static void setUniformMat4(Shader shader, String name, Mat4 mat4) {
         int location = glGetUniformLocation(shader.getProgramID(), name);
         glUniformMatrix4fv(location, false, mat4.toFa_());
+    }
+
+    public static void setUniformMat4(Shader shader, String name, Matrix4f mat4) {
+        int location = glGetUniformLocation(shader.getProgramID(), name);
+        FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+        mat4.get(fb);
+        glUniformMatrix4fv(location, false, fb);
+    }
+
+    public static void setUniformMat4(Shader shader, String name, FloatBuffer mat4) {
+        int location = glGetUniformLocation(shader.getProgramID(), name);
+        glUniformMatrix4fv(location, false, mat4);
     }
 }

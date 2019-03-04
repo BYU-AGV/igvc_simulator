@@ -90,5 +90,7 @@
     <orderEntry type="library" name="Maven: io.github.java-graphics:openvr:1.0" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna:4.2.2" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jna:jna-platform:4.2.2" level="project" />
+    <orderEntry type="library" name="Maven: org.la4j:la4j:0.6.0" level="project" />
+    <orderEntry type="library" name="Maven: org.joml:joml:1.9.13" level="project" />
   </component>
 </module>

@@ -1,14 +1,21 @@
 package com.byu_igvc.core.render;
 
 import com.byu_igvc.core.render.Shader;
+import com.byu_igvc.core.scene.model.IMesh;
 import com.byu_igvc.logger.Logger;
 import glm.vec._3.Vec3;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.assimp.AIFace;
+import org.lwjgl.assimp.AIMesh;
+import org.lwjgl.assimp.AIVector3D;
 
 import java.lang.reflect.Array;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.lwjgl.opengl.ARBVertexBufferObject.*;
 import static org.lwjgl.opengl.GL33C.*;
 
 public class Mesh {
@@ -57,11 +64,12 @@ public class Mesh {
         shader.compile();
     }
 
-    public void addVertex(Vec3 point) {
+    public Mesh addVertex(Vec3 point) {
         this.vertexData.add(point.x);
         this.vertexData.add(point.y);
         this.vertexData.add(point.z);
         indices.add(indices.size());
+        return this;
     }
 
     public int getVertexBuffer() {
