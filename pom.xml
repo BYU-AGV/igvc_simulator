@@ -462,14 +462,6 @@
         </dependency>
 
 
-
-        <dependency>
-            <groupId>org.la4j</groupId>
-            <artifactId>la4j</artifactId>
-            <version>0.6.0</version>
-        </dependency>
-
-
         <dependency>
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>

@@ -9,6 +9,8 @@ import com.byu_igvc.core.render.Mesh;
 import com.byu_igvc.core.render.OpenGLRenderingEngine;
 import com.byu_igvc.core.render.Shader;
 import com.byu_igvc.core.scene.Camera;
+import com.byu_igvc.core.scene.model.AiModel;
+import com.byu_igvc.core.scene.model.AssimpModelLoader;
 import com.byu_igvc.core.scene.model.Model;
 import com.byu_igvc.logger.Logger;
 import glm.vec._3.Vec3;
@@ -22,6 +24,12 @@ public class Simulator implements IWorld {
     private Mesh mesh;
     private Model model;
     private Camera camera;
+    private AiModel importedModel;
+
+    public Simulator() {
+        camera = new Camera();
+        inputManager = new InputManager();
+    }
 
     @Override
     public void setRenderEngine(IRenderEngine renderEngine) {
@@ -35,8 +43,6 @@ public class Simulator implements IWorld {
         mesh.addVertex(new Vec3(-1, -1, 0)).addVertex(new Vec3(1, -1, 0)).addVertex(new Vec3(0, 1, 0));
         mesh.compile();
         model = new Model(mesh, new Vector3f());
-        camera = new Camera();
-        inputManager = new InputManager();
         inputManager.init();
         inputManager.registerListener(CursorMoveEvent.class, new CursorMoveListener() {
             @Override
@@ -44,6 +50,8 @@ public class Simulator implements IWorld {
                 camera.updateMatricesFromInput(x, y, 0.0016);
             }
         });
+        importedModel = AssimpModelLoader.loadModel("src/main/resources/magnet/magnet.obj");
+        importedModel.compile();
     }
 
     @Override
@@ -89,6 +97,7 @@ public class Simulator implements IWorld {
     public void render() {
         renderEngine.startFrame();
         renderEngine.renderModel(camera, model);
+        renderEngine.renderModel(camera, importedModel);
         renderEngine.updateWindow();
     }
 

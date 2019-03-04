@@ -1,5 +1,6 @@
 package com.byu_igvc.core.scene.model;
 
+import com.byu_igvc.core.render.Shader;
 import org.lwjgl.assimp.*;
 import org.lwjgl.system.*;
 import java.io.IOException;
@@ -14,7 +15,7 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
 import static org.lwjgl.system.MemoryUtil.memCopy;
 
 public class AssimpModelLoader {
-    public AiModel loadModel(String path) {
+    public static AiModel loadModel(String path) {
         AIFileIO fileIo = AIFileIO.create();
         AIFileOpenProcI fileOpenProc = new AIFileOpenProc() {
             public long invoke(long pFileIO, long fileName, long openMode) {
@@ -63,12 +64,12 @@ public class AssimpModelLoader {
             }
         };
         fileIo.set(fileOpenProc, fileCloseProc, NULL);
-        AIScene scene = aiImportFileEx("org/lwjgl/demo/opengl/assimp/magnet.obj",
-                aiProcess_JoinIdenticalVertices | aiProcess_Triangulate, fileIo);
+        AIScene scene = aiImportFile(Paths.get(path).toString(),
+                aiProcess_JoinIdenticalVertices | aiProcess_Triangulate);
         if (scene == null) {
             throw new IllegalStateException(aiGetErrorString());
         }
 
-        return new AiModel(scene);
+        return new AiModel(scene, new Shader("src/main/resources/shaders/vert.glsl", "src/main/resources/shaders/frag.glsl"));
     }
 }

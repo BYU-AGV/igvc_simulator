@@ -2,14 +2,17 @@ package com.byu_igvc.core.render;
 
 import com.byu_igvc.core.scene.Camera;
 import com.byu_igvc.core.scene.model.AiModel;
+import com.byu_igvc.core.scene.model.ImportedMesh;
 import com.byu_igvc.core.scene.model.Model;
 import com.byu_igvc.logger.Logger;
 import org.joml.Matrix4f;
+import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
 import java.awt.*;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -102,6 +105,27 @@ public class OpenGLRenderingEngine implements IRenderEngine {
 //        camera.getViewMatrix();
 
         renderMesh(model.getMesh(), mvp.mul(camera.getViewMatrix().mul(new Matrix4f())));
+    }
+
+    @Override
+    public void renderModel(Camera camera, AiModel model) {
+        Matrix4f mvp = camera.getProjectionMatrix().mul(camera.getViewMatrix().mul(new Matrix4f()));
+        FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+        glUseProgram(model.getShader().getProgramID());
+
+        for (ImportedMesh mesh : model.getMeshes()) {
+            glBindBuffer(GL_ARRAY_BUFFER, mesh.getVertexArrayBuffer());
+            glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+            glBindBuffer(GL_ARRAY_BUFFER, mesh.getNormalArrayBuffer());
+            glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+            Shader.setUniformMat4(model.getShader(), "mvp", mvp.get(fb));
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getElementArrayBuffer());
+            glDrawElements(GL_TRIANGLES, mesh.getElementCount(), GL_UNSIGNED_INT, 0);
+        }
+
+//        glBindBuffer(GL_ARRAY_BUFFER, 0);
+//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//        glUseProgram(0);
     }
 
     @Override
