@@ -1,11 +1,9 @@
 package com.byu_igvc.core.scene;
 
 import com.byu_igvc.core.render.OpenGLRenderingEngine;
-import glm.Glm;
-import glm.mat._4.Mat4;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.joml.Vector3fc;
 import org.lwjgl.BufferUtils;
 
 import java.nio.FloatBuffer;
@@ -19,6 +17,9 @@ public class Camera {
     Vector3f dir;
     Vector3f right;
     Vector3f up;
+    Vector3f worldUp;
+
+    Quaternionf rotation;
 
     float xOffset = 0.0f;
     float yOffset = 0.0f;
@@ -30,9 +31,11 @@ public class Camera {
     public Camera() {
         projection.setPerspective((float) Math.toRadians(45), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.01f, 1000f);
         pos = new Vector3f(0, 0, 3);
-        dir = new Vector3f(0, 0, 1);
+        dir = new Vector3f(0, 0, -1);
         right = new Vector3f();
-        up = new Vector3f();
+        up = new Vector3f(0, 1, 0);
+        worldUp = new Vector3f(0, 1, 0);
+        rotation = new Quaternionf();
        updateMatricesFromInput(0 ,0 ,0);
     }
 
@@ -42,7 +45,7 @@ public class Camera {
      * @return projection matrix
      */
     public Matrix4f getProjectionMatrix() {
-        return projection.setPerspective((float) Math.toRadians(45), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.01f, 1000f).rotateZ((float) Math.toRadians(-90));
+        return projection.setPerspective((float) Math.toRadians(45), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.01f, 1000f);
     }
 
     /**
@@ -50,7 +53,8 @@ public class Camera {
      * @return
      */
     public Matrix4f getViewMatrix() {
-        return view.identity().rotateX(xOffset).rotateY(yOffset).translate(-pos.x, -pos.y, -pos.z);
+        Vector3f front = new Vector3f(pos);
+        return view.identity().lookAt(pos, front.add(dir), worldUp);
     }
 
     public void goForward() {
@@ -70,23 +74,28 @@ public class Camera {
     }
 
     public void goUp() {
-        pos.add(up);
-    }
-
-    public void goDown() {
         pos.sub(up);
     }
 
+    public void goDown() {
+        pos.add(up);
+    }
+
     public void updateMatricesFromInput(double x, double y, double deltatime) {
-        xOffset += (xOld - x) * sensitivity * deltatime;
-        yOffset += (y - yOld) * sensitivity * deltatime;
+        xOffset -= (xOld - x) * sensitivity * deltatime;
+        yOffset -= (y - yOld) * sensitivity * deltatime;
+
+        dir.x = (float) Math.cos((xOffset) * Math.cos(yOffset));
+        dir.y = (float) Math.sin((yOffset));
+        dir.z = (float) (Math.sin(xOffset) * Math.cos(yOffset));
+
+        dir.normalize();
+        dir.cross(worldUp, right);
+        right.negate().normalize();
+        right.cross(dir, up);
+        up.normalize();
 
         xOld = x;
         yOld = y;
-
-        view.identity().rotateY(yOffset).rotateX(xOffset).translate(-pos.x, -pos.y, -pos.z); // create view vector
-        view.positiveZ(dir).negate(); // Create direction vector
-        view.positiveY(right).negate(); // create right vector
-        view.positiveX(up).negate(); // create up vector
     }
 }

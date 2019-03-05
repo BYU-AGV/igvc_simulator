@@ -1,30 +1,15 @@
 package com.byu_igvc.core.render;
 
-import com.byu_igvc.core.render.Shader;
-import com.byu_igvc.core.scene.model.IMesh;
 import com.byu_igvc.logger.Logger;
 import glm.vec._3.Vec3;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.assimp.AIFace;
-import org.lwjgl.assimp.AIMesh;
-import org.lwjgl.assimp.AIVector3D;
 
-import java.lang.reflect.Array;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.lwjgl.opengl.ARBVertexBufferObject.*;
 import static org.lwjgl.opengl.GL33C.*;
 
 public class Mesh {
-
-//    private final float[] vertexData = {
-//            -1.0f, -1.0f, 0.0f,
-//            1.0f, -1.0f, 0.0f,
-//            0.0f,  1.0f, 0.0f,
-//    };
     private List<Float> vertexData;
     private List<Integer> indices;
     private int indexBufferID;
