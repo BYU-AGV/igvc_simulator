@@ -10,7 +10,6 @@ import com.byu_igvc.core.scene.model.AiModel;
 import com.byu_igvc.core.scene.model.AssimpModelLoader;
 import com.byu_igvc.core.scene.model.Model;
 import com.byu_igvc.logger.Logger;
-import glm.vec._3.Vec3;
 import org.joml.Vector3f;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -20,10 +19,8 @@ public class Simulator implements IWorld {
     private InputManager inputManager;
     private Mesh mesh;
     private Model model;
-    private Model model1;
     private Camera camera;
     private AiModel importedModel;
-    private Mesh mesh2;
 
     public Simulator() {
         camera = new Camera();
@@ -38,18 +35,7 @@ public class Simulator implements IWorld {
     @Override
     public void init() {
         renderEngine.init();
-        mesh = new Mesh(new Shader("src/main/resources/shaders/vert.glsl", "src/main/resources/shaders/frag.glsl"));
-        mesh.addVertex(new Vec3(-1, -1, 0)).addVertex(new Vec3(1, -1, 0)).addVertex(new Vec3(0, 1, 0));
-        mesh.compile();
-        mesh2 = new Mesh(new Shader("src/main/resources/shaders/vert.glsl", "src/main/resources/shaders/frag.glsl"))
-                .addVertex(new Vec3(-10, 0, -10))
-                .addVertex(new Vec3(-10, 0, 10))
-                .addVertex(new Vec3(10, 0, 10))
-                .addVertex(new Vec3(-10, 0, -10))
-                .addVertex(new Vec3(10, 0, 10))
-                .addVertex(new Vec3(10, 0, -10));
-        mesh2.compile();
-        model1 = new Model(mesh2, new Vector3f(1, 1, 1));
+        mesh = Mesh.createCube(2);
         model = new Model(mesh, new Vector3f());
         inputManager.init();
         inputManager.registerListener(CursorMoveEvent.class, new CursorMoveListener() {
@@ -106,7 +92,6 @@ public class Simulator implements IWorld {
     public void render() {
         renderEngine.startFrame();
         renderEngine.renderModel(camera, model);
-        renderEngine.renderModel(camera, model1);
         renderEngine.renderModel(camera, importedModel);
         renderEngine.updateWindow();
     }

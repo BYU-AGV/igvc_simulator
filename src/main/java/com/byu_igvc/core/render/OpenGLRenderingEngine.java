@@ -6,6 +6,7 @@ import com.byu_igvc.core.scene.model.ImportedMesh;
 import com.byu_igvc.core.scene.model.Model;
 import com.byu_igvc.logger.Logger;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
@@ -83,7 +84,6 @@ public class OpenGLRenderingEngine implements IRenderEngine {
         glClearColor(backgroundColor.getRed() / 255.0f, backgroundColor.getGreen() / 255.0f,  backgroundColor.getBlue() / 255.0f, 0.0f);
 
         glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LESS);
     }
 
     @Override
@@ -95,7 +95,7 @@ public class OpenGLRenderingEngine implements IRenderEngine {
 
         glBindVertexArray(mesh.getVertexArrayID());
 //        glDrawElements(GL_TRIANGLES, mesh.getIndexSize(), GL_UNSIGNED_INT,0);
-        glDrawArrays(GL_TRIANGLES, 0, mesh.getNumberOfVerticies());
+        glDrawArrays(GL_TRIANGLES, 0, mesh.getNumberOfVertices());
 
         glBindVertexArray(0);
         glUseProgram(0);
@@ -104,16 +104,13 @@ public class OpenGLRenderingEngine implements IRenderEngine {
     @Override
     public void renderModel(Camera camera, Model model) {
         Matrix4f mvp = camera.getProjectionMatrix();
-//        renderMesh(model.getMesh(), mvp.mul(camera.getViewMatrix()).mul(new Matrix4f()));
-//        renderMesh(model.getMesh(), mvp.mul(camera.getViewMatrix().mul(new Matrix4f().identity().scale(1))));
         glUseProgram(model.getMesh().getShader().getProgramID());
         Shader.setUniformMat4(model.getMesh().getShader(), "projection", camera.getProjectionMatrix());
         Shader.setUniformMat4(model.getMesh().getShader(), "view", camera.getViewMatrix());
         Shader.setUniformMat4(model.getMesh().getShader(), "model", new Matrix4f().translate(model.getPosition()));
 
         glBindVertexArray(model.getMesh().getVertexArrayID());
-//        glDrawElements(GL_TRIANGLES, mesh.getIndexSize(), GL_UNSIGNED_INT,0);
-        glDrawArrays(GL_TRIANGLES, 0, model.getMesh().getNumberOfVerticies());
+        glDrawArrays(GL_TRIANGLES, 0, model.getMesh().getNumberOfVertices());
 
         glBindVertexArray(0);
         glUseProgram(0);
@@ -125,15 +122,22 @@ public class OpenGLRenderingEngine implements IRenderEngine {
         FloatBuffer fb = BufferUtils.createFloatBuffer(16);
         glUseProgram(model.getShader().getProgramID());
 
+        Shader.setUniformMat4(model.getShader(), "projection", camera.getProjectionMatrix());
+        Shader.setUniformMat4(model.getShader(), "view", camera.getViewMatrix());
+        Shader.setUniformMat4(model.getShader(), "model", new Matrix4f().translate(new Vector3f(0, 0, 0)));
+
         for (ImportedMesh mesh : model.getMeshes()) {
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.getVertexArrayBuffer());
-            glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-            glBindBuffer(GL_ARRAY_BUFFER, mesh.getNormalArrayBuffer());
-            glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-            Shader.setUniformMat4(model.getShader(), "mvp", mvp.get(fb));
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getElementArrayBuffer());
-            glDrawElements(GL_TRIANGLES, mesh.getElementCount(), GL_UNSIGNED_INT, 0);
+//            glBindBuffer(GL_ARRAY_BUFFER, mesh.getVertexArrayBuffer());
+//            glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+//            glBindBuffer(GL_ARRAY_BUFFER, mesh.getNormalArrayBuffer());
+//            glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
+//            Shader.setUniformMat4(model.getShader(), "mvp", mvp.get(fb));
+//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getElementArrayBuffer());
+//            glDrawElements(GL_TRIANGLES, mesh.getElementCount(), GL_UNSIGNED_INT, 0);
 //            glDrawArrays(GL_TRIANGLES, 0, mesh.getElementCount());
+
+            glBindVertexArray(mesh.getVertexArrayBuffer());
+            glDrawArrays(GL_TRIANGLES, 0, mesh.getNumVertices());
         }
 
 //        glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -1,14 +1,23 @@
 package com.byu_igvc.core.scene.model;
 
+import com.byu_igvc.logger.Logger;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AIVector3D;
 
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
-import static org.lwjgl.opengl.ARBVertexBufferObject.*;
 import static org.lwjgl.opengl.GL15C.*;
+import static org.lwjgl.opengl.GL20C.glEnableVertexAttribArray;
+import static org.lwjgl.opengl.GL20C.glVertexAttribPointer;
+import static org.lwjgl.opengl.GL30C.glBindVertexArray;
+import static org.lwjgl.opengl.GL30C.glGenVertexArrays;
 
 public class ImportedMesh implements IMesh {
     private AIMesh mesh;
@@ -16,36 +25,43 @@ public class ImportedMesh implements IMesh {
     private int normalArrayBuffer;
     private int elementArrayBuffer;
     private int elementCount;
+    FloatBuffer fb;
 
     @Override
     public void compile() {
-        vertexArrayBuffer = glGenBuffers();
-        glBindBufferARB(GL_ARRAY_BUFFER, vertexArrayBuffer);
+        createArrays();
+        vertexArrayBuffer = glGenVertexArrays();
+        glBindVertexArray(vertexArrayBuffer);
+
+        int vertexBuffer = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+        glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+    }
+
+    private void createArrays() {
         AIVector3D.Buffer vertices = mesh.mVertices();
-        nglBufferData(GL_ARRAY_BUFFER, AIVector3D.SIZEOF * vertices.remaining(),
-                vertices.address(), GL_STATIC_DRAW);
-
-        normalArrayBuffer = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, normalArrayBuffer);
-        AIVector3D.Buffer normals = mesh.mNormals();
-        nglBufferData(GL_ARRAY_BUFFER, AIVector3D.SIZEOF * normals.remaining(),
-                normals.address(), GL_STATIC_DRAW);
-
-        int faceCount = mesh.mNumFaces();
-        elementCount = faceCount * 3;
-        IntBuffer elementArrayBufferData = BufferUtils.createIntBuffer(elementCount);
         AIFace.Buffer facesBuffer = mesh.mFaces();
-        for (int i = 0; i < faceCount; ++i) {
-            AIFace face = facesBuffer.get(i);
-            if (face.mNumIndices() != 3) {
-                throw new IllegalStateException("AIFace.mNumIndices() != 3");
-            }
-            elementArrayBufferData.put(face.mIndices());
+        List<Integer> indexList = new ArrayList<>();
+        for (int i = 0; i < mesh.mNumFaces(); i++) {
+            indexList.add(facesBuffer.get(i).mIndices().get(0));
+            indexList.add(facesBuffer.get(i).mIndices().get(1));
+            indexList.add(facesBuffer.get(i).mIndices().get(2));
         }
-        elementArrayBufferData.flip();
-        elementArrayBuffer = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementArrayBuffer);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementArrayBufferData, GL_STATIC_DRAW);
+
+        // Create float buffer
+        fb = BufferUtils.createFloatBuffer(indexList.size() * 3);
+        for (Integer index : indexList) {
+            fb.put(vertices.get(index).x());
+            fb.put(vertices.get(index).y());
+            fb.put(vertices.get(index).z());
+        }
+        fb.flip();
     }
 
     public ImportedMesh(AIMesh aiMesh) {
@@ -70,5 +86,9 @@ public class ImportedMesh implements IMesh {
 
     public int getElementCount() {
         return elementCount;
+    }
+
+    public int getNumVertices() {
+        return fb.capacity();
     }
 }
