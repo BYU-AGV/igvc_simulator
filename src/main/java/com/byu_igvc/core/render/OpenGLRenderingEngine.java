@@ -89,7 +89,9 @@ public class OpenGLRenderingEngine implements IRenderEngine {
     @Override
     public void renderMesh(Mesh mesh, Matrix4f modelviewprojection) {
         glUseProgram(mesh.getShader().getProgramID());
-        Shader.setUniformMat4(mesh.getShader(), "mvp", modelviewprojection);
+        Shader.setUniformMat4(mesh.getShader(), "projection", modelviewprojection);
+        Shader.setUniformMat4(mesh.getShader(), "view", modelviewprojection);
+        Shader.setUniformMat4(mesh.getShader(), "model", modelviewprojection);
 
         glBindVertexArray(mesh.getVertexArrayID());
 //        glDrawElements(GL_TRIANGLES, mesh.getIndexSize(), GL_UNSIGNED_INT,0);
@@ -102,9 +104,19 @@ public class OpenGLRenderingEngine implements IRenderEngine {
     @Override
     public void renderModel(Camera camera, Model model) {
         Matrix4f mvp = camera.getProjectionMatrix();
-//        camera.getViewMatrix();
+//        renderMesh(model.getMesh(), mvp.mul(camera.getViewMatrix()).mul(new Matrix4f()));
+//        renderMesh(model.getMesh(), mvp.mul(camera.getViewMatrix().mul(new Matrix4f().identity().scale(1))));
+        glUseProgram(model.getMesh().getShader().getProgramID());
+        Shader.setUniformMat4(model.getMesh().getShader(), "projection", camera.getProjectionMatrix());
+        Shader.setUniformMat4(model.getMesh().getShader(), "view", camera.getViewMatrix());
+        Shader.setUniformMat4(model.getMesh().getShader(), "model", new Matrix4f().translate(model.getPosition()));
 
-        renderMesh(model.getMesh(), mvp.mul(camera.getViewMatrix().mul(new Matrix4f())));
+        glBindVertexArray(model.getMesh().getVertexArrayID());
+//        glDrawElements(GL_TRIANGLES, mesh.getIndexSize(), GL_UNSIGNED_INT,0);
+        glDrawArrays(GL_TRIANGLES, 0, model.getMesh().getNumberOfVerticies());
+
+        glBindVertexArray(0);
+        glUseProgram(0);
     }
 
     @Override
@@ -121,6 +133,7 @@ public class OpenGLRenderingEngine implements IRenderEngine {
             Shader.setUniformMat4(model.getShader(), "mvp", mvp.get(fb));
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getElementArrayBuffer());
             glDrawElements(GL_TRIANGLES, mesh.getElementCount(), GL_UNSIGNED_INT, 0);
+//            glDrawArrays(GL_TRIANGLES, 0, mesh.getElementCount());
         }
 
 //        glBindBuffer(GL_ARRAY_BUFFER, 0);

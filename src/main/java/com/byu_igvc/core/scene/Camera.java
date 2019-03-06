@@ -2,41 +2,46 @@ package com.byu_igvc.core.scene;
 
 import com.byu_igvc.core.render.OpenGLRenderingEngine;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
-
-import java.nio.FloatBuffer;
 
 public class Camera {
-    Matrix4f projection = new Matrix4f();
-    Matrix4f view = new Matrix4f();
+    /**
+     * Projection matrix
+     */
+    private Matrix4f projection = new Matrix4f();
+    /**
+     * Camera view matrix
+     */
+    private Matrix4f view = new Matrix4f();
 
-    FloatBuffer fb = BufferUtils.createFloatBuffer(16);
-    Vector3f pos;
-    Vector3f dir;
-    Vector3f right;
-    Vector3f up;
-    Vector3f worldUp;
+    /**
+     * Vectors to keep track of direction, position and crossed vectors
+     */
+    private Vector3f position;
+    private Vector3f direction;
+    private Vector3f right;
+    private Vector3f cameraUp;
+    private Vector3f worldUp;
 
-    Quaternionf rotation;
+    private float xOffset = 0.0f;
+    private float yOffset = 0.0f;
+    private float xOld = 0;
+    private float yOld = 0;
 
-    float xOffset = 0.0f;
-    float yOffset = 0.0f;
+    private float sensitivity = 0.5f;
 
-    float sensitivity = 0.5f;
-    private double xOld = 0;
-    private double yOld = 0;
+    private static final float CAMERA_NEAR = 0.01f;
+    private static final float CAMERA_FAR = 1000f;
+    private static final float CAMERA_FOV = 45;
 
     public Camera() {
-        projection.setPerspective((float) Math.toRadians(45), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.01f, 1000f);
-        pos = new Vector3f(0, 0, 3);
-        dir = new Vector3f(0, 0, -1);
+        projection.setPerspective((float) Math.toRadians(CAMERA_FOV), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), CAMERA_NEAR, CAMERA_FAR);
+        position = new Vector3f(0, 0, 3);
+        direction = new Vector3f(0, 0, -1);
         right = new Vector3f();
-        up = new Vector3f(0, 1, 0);
+        cameraUp = new Vector3f(0, 1, 0);
         worldUp = new Vector3f(0, 1, 0);
-        rotation = new Quaternionf();
-       updateMatricesFromInput(0 ,0 ,0);
+       updateMatricesFromInput(0 ,0 ,1);
     }
 
     /**
@@ -45,57 +50,73 @@ public class Camera {
      * @return projection matrix
      */
     public Matrix4f getProjectionMatrix() {
-        return projection.setPerspective((float) Math.toRadians(45), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), 0.01f, 1000f);
+        return projection.setPerspective((float) Math.toRadians(CAMERA_FOV), OpenGLRenderingEngine.getWidth() / OpenGLRenderingEngine.getHeight(), CAMERA_NEAR, CAMERA_FAR);
     }
 
     /**
      * Gets the view matrix
-     * @return
+     * @return matrix that is transformed and rotated to reflect camera
      */
     public Matrix4f getViewMatrix() {
-        Vector3f front = new Vector3f(pos);
-        return view.identity().lookAt(pos, front.add(dir), worldUp);
+        Vector3f front = new Vector3f(position);
+        return view.identity().lookAt(position, front.add(direction), worldUp);
     }
 
     public void goForward() {
-        pos.add(dir);
+        position.add(direction);
     }
 
     public void goBackward() {
-        pos.sub(dir);
+        position.sub(direction);
     }
 
     public void goLeft() {
-        pos.add(right);
+        position.add(right);
     }
 
     public void goRight() {
-        pos.sub(right);
+        position.sub(right);
     }
 
     public void goUp() {
-        pos.sub(up);
+        position.sub(cameraUp);
     }
 
     public void goDown() {
-        pos.add(up);
+        position.add(cameraUp);
+    }
+
+    public void rotateHorizontal(float degree) {
+        updateMatricesFromInput(degree, 0, 1);
+    }
+
+    public void rotateVertical(float degree) {
+        updateMatricesFromInput(0, degree, 1);
     }
 
     public void updateMatricesFromInput(double x, double y, double deltatime) {
         xOffset -= (xOld - x) * sensitivity * deltatime;
         yOffset -= (y - yOld) * sensitivity * deltatime;
 
-        dir.x = (float) Math.cos((xOffset) * Math.cos(yOffset));
-        dir.y = (float) Math.sin((yOffset));
-        dir.z = (float) (Math.sin(xOffset) * Math.cos(yOffset));
+        direction.x = (float) Math.cos((xOffset) * Math.cos(yOffset));
+        direction.y = (float) Math.sin((yOffset));
+        direction.z = (float) (Math.sin(xOffset) * Math.cos(yOffset));
+        direction.normalize();
 
-        dir.normalize();
-        dir.cross(worldUp, right);
+        direction.cross(worldUp, right);
         right.negate().normalize();
-        right.cross(dir, up);
-        up.normalize();
+        right.cross(direction, cameraUp);
+        cameraUp.normalize();
 
-        xOld = x;
-        yOld = y;
+        xOld = (float) x;
+        yOld = (float) y;
+    }
+
+    public float getSensitivity() {
+        return sensitivity;
+    }
+
+    public void setSensitivity(float sensitivity) {
+        this.sensitivity = sensitivity;
     }
 }

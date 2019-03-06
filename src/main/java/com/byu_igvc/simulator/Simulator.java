@@ -4,10 +4,7 @@ import com.byu_igvc.core.input.InputManager;
 import com.byu_igvc.core.input.event.CursorMoveEvent;
 import com.byu_igvc.core.input.listener.CursorMoveListener;
 import com.byu_igvc.core.physics.IWorld;
-import com.byu_igvc.core.render.IRenderEngine;
-import com.byu_igvc.core.render.Mesh;
-import com.byu_igvc.core.render.OpenGLRenderingEngine;
-import com.byu_igvc.core.render.Shader;
+import com.byu_igvc.core.render.*;
 import com.byu_igvc.core.scene.Camera;
 import com.byu_igvc.core.scene.model.AiModel;
 import com.byu_igvc.core.scene.model.AssimpModelLoader;
@@ -23,8 +20,10 @@ public class Simulator implements IWorld {
     private InputManager inputManager;
     private Mesh mesh;
     private Model model;
+    private Model model1;
     private Camera camera;
     private AiModel importedModel;
+    private Mesh mesh2;
 
     public Simulator() {
         camera = new Camera();
@@ -42,6 +41,15 @@ public class Simulator implements IWorld {
         mesh = new Mesh(new Shader("src/main/resources/shaders/vert.glsl", "src/main/resources/shaders/frag.glsl"));
         mesh.addVertex(new Vec3(-1, -1, 0)).addVertex(new Vec3(1, -1, 0)).addVertex(new Vec3(0, 1, 0));
         mesh.compile();
+        mesh2 = new Mesh(new Shader("src/main/resources/shaders/vert.glsl", "src/main/resources/shaders/frag.glsl"))
+                .addVertex(new Vec3(-10, 0, -10))
+                .addVertex(new Vec3(-10, 0, 10))
+                .addVertex(new Vec3(10, 0, 10))
+                .addVertex(new Vec3(-10, 0, -10))
+                .addVertex(new Vec3(10, 0, 10))
+                .addVertex(new Vec3(10, 0, -10));
+        mesh2.compile();
+        model1 = new Model(mesh2, new Vector3f(1, 1, 1));
         model = new Model(mesh, new Vector3f());
         inputManager.init();
         inputManager.registerListener(CursorMoveEvent.class, new CursorMoveListener() {
@@ -62,8 +70,10 @@ public class Simulator implements IWorld {
     @Override
     public void simulate() {
         while (!renderEngine.shouldShutDown()) {
+            FPS.startFrame();
             tick();
             render();
+            FPS.endFrame();
         }
         Logger.head("Shutting down");
         renderEngine.shutdown();
@@ -86,7 +96,6 @@ public class Simulator implements IWorld {
             camera.goDown();
         if (inputManager.isKeyDown(GLFW_KEY_ESCAPE))
             triggerShutdownEvent();
-        inputManager.tick();
     }
 
     private void triggerShutdownEvent() {
@@ -97,6 +106,7 @@ public class Simulator implements IWorld {
     public void render() {
         renderEngine.startFrame();
         renderEngine.renderModel(camera, model);
+        renderEngine.renderModel(camera, model1);
         renderEngine.renderModel(camera, importedModel);
         renderEngine.updateWindow();
     }
