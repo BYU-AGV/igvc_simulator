@@ -7,13 +7,11 @@ import com.byu_igvc.core.scene.model.Model;
 import com.byu_igvc.logger.Logger;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
 import java.awt.*;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
@@ -84,6 +82,9 @@ public class OpenGLRenderingEngine implements IRenderEngine {
         glClearColor(backgroundColor.getRed() / 255.0f, backgroundColor.getGreen() / 255.0f,  backgroundColor.getBlue() / 255.0f, 0.0f);
 
         glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LESS);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_CCW);
     }
 
     @Override
@@ -118,8 +119,6 @@ public class OpenGLRenderingEngine implements IRenderEngine {
 
     @Override
     public void renderModel(Camera camera, AiModel model) {
-        Matrix4f mvp = camera.getProjectionMatrix().mul(camera.getViewMatrix().mul(new Matrix4f()));
-        FloatBuffer fb = BufferUtils.createFloatBuffer(16);
         glUseProgram(model.getShader().getProgramID());
 
         Shader.setUniformMat4(model.getShader(), "projection", camera.getProjectionMatrix());
@@ -127,22 +126,17 @@ public class OpenGLRenderingEngine implements IRenderEngine {
         Shader.setUniformMat4(model.getShader(), "model", new Matrix4f().translate(new Vector3f(0, 0, 0)));
 
         for (ImportedMesh mesh : model.getMeshes()) {
-//            glBindBuffer(GL_ARRAY_BUFFER, mesh.getVertexArrayBuffer());
-//            glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
-//            glBindBuffer(GL_ARRAY_BUFFER, mesh.getNormalArrayBuffer());
-//            glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-//            Shader.setUniformMat4(model.getShader(), "mvp", mvp.get(fb));
-//            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.getElementArrayBuffer());
-//            glDrawElements(GL_TRIANGLES, mesh.getElementCount(), GL_UNSIGNED_INT, 0);
-//            glDrawArrays(GL_TRIANGLES, 0, mesh.getElementCount());
-
+            Shader.setUniformVec3(model.getShader(), "uDiffuseColor", model.getMaterials().get(mesh.getMesh().mMaterialIndex()).mDiffuseColor);
+            Shader.setUniformVec3(model.getShader(), "uSpecularColor", model.getMaterials().get(mesh.getMesh().mMaterialIndex()).mSpecularColor);
+            Shader.setUniformVec3(model.getShader(), "uAmbientColor", model.getMaterials().get(mesh.getMesh().mMaterialIndex()).mAmbientColor);
+            Shader.setUniformVec3(model.getShader(), "uLightPosition", new Vector3f(1, 1, 1));
+            Shader.setUniformVec3(model.getShader(), "uViewPosition", camera.getViewPosition().negate());
             glBindVertexArray(mesh.getVertexArrayBuffer());
             glDrawArrays(GL_TRIANGLES, 0, mesh.getNumVertices());
         }
 
-//        glBindBuffer(GL_ARRAY_BUFFER, 0);
-//        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//        glUseProgram(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glUseProgram(0);
     }
 
     @Override

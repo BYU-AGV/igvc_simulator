@@ -28,7 +28,7 @@ public class Camera {
     private float xOld = 0;
     private float yOld = 0;
 
-    private float sensitivity = 0.5f;
+    private float sensitivity = 20f;
 
     private static final float CAMERA_NEAR = 0.01f;
     private static final float CAMERA_FAR = 1000f;
@@ -98,9 +98,15 @@ public class Camera {
         xOffset -= (xOld - x) * sensitivity * deltatime;
         yOffset -= (y - yOld) * sensitivity * deltatime;
 
-        direction.x = (float) Math.cos((xOffset) * Math.cos(yOffset));
-        direction.y = (float) Math.sin((yOffset));
-        direction.z = (float) (Math.sin(xOffset) * Math.cos(yOffset));
+        if (yOffset > 89.0f) {
+            yOffset = 89.0f;
+        } else if (yOffset < -89.0f) {
+            yOffset = -89.0f;
+        }
+
+        direction.x = (float) Math.cos(Math.toRadians(xOffset) * Math.cos(Math.toRadians(yOffset)));
+        direction.y = (float) Math.sin(Math.toRadians(yOffset));
+        direction.z = (float) (Math.sin(Math.toRadians(xOffset)) * Math.cos(Math.toRadians(yOffset)));
         direction.normalize();
 
         direction.cross(worldUp, right);
@@ -118,5 +124,19 @@ public class Camera {
 
     public void setSensitivity(float sensitivity) {
         this.sensitivity = sensitivity;
+    }
+
+    public Vector3f getPosition() {
+        return position;
+    }
+
+    public void setPosition(Vector3f position) {
+        this.position = position;
+    }
+
+    public Vector3f getViewPosition() {
+        Vector3f vector3f = new Vector3f();
+        position.add(direction, vector3f);
+        return vector3f;
     }
 }

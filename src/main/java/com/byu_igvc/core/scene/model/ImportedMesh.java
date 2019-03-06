@@ -1,16 +1,12 @@
 package com.byu_igvc.core.scene.model;
 
-import com.byu_igvc.logger.Logger;
-import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AIMesh;
 import org.lwjgl.assimp.AIVector3D;
 
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static org.lwjgl.opengl.GL15C.*;
@@ -25,7 +21,8 @@ public class ImportedMesh implements IMesh {
     private int normalArrayBuffer;
     private int elementArrayBuffer;
     private int elementCount;
-    FloatBuffer fb;
+    private FloatBuffer vertexFB;
+    private FloatBuffer normalFB;
 
     @Override
     public void compile() {
@@ -35,10 +32,17 @@ public class ImportedMesh implements IMesh {
 
         int vertexBuffer = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-        glBufferData(GL_ARRAY_BUFFER, fb, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertexFB, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+
+        int normalBuffer = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
+        glBufferData(GL_ARRAY_BUFFER, normalFB, GL_STATIC_DRAW);
+
+        glEnableVertexAttribArray(1);
+        glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
 
         glBindVertexArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -46,22 +50,33 @@ public class ImportedMesh implements IMesh {
 
     private void createArrays() {
         AIVector3D.Buffer vertices = mesh.mVertices();
+        AIVector3D.Buffer normals = mesh.mNormals();
         AIFace.Buffer facesBuffer = mesh.mFaces();
         List<Integer> indexList = new ArrayList<>();
+        List<AIVector3D> nm = new ArrayList<>();
         for (int i = 0; i < mesh.mNumFaces(); i++) {
             indexList.add(facesBuffer.get(i).mIndices().get(0));
             indexList.add(facesBuffer.get(i).mIndices().get(1));
             indexList.add(facesBuffer.get(i).mIndices().get(2));
         }
 
-        // Create float buffer
-        fb = BufferUtils.createFloatBuffer(indexList.size() * 3);
-        for (Integer index : indexList) {
-            fb.put(vertices.get(index).x());
-            fb.put(vertices.get(index).y());
-            fb.put(vertices.get(index).z());
+        for (int i = 0; i < normals.capacity(); i++) {
+            nm.add(normals.get(i));
         }
-        fb.flip();
+
+        // Create float buffer
+        vertexFB = BufferUtils.createFloatBuffer((indexList.size() * 3));
+        normalFB = BufferUtils.createFloatBuffer((indexList.size() * 3));
+        for (Integer index : indexList) {
+            vertexFB.put(vertices.get(index).x());
+            vertexFB.put(vertices.get(index).y());
+            vertexFB.put(vertices.get(index).z());
+
+            normalFB.put(normals.get(index).x());
+            normalFB.put(normals.get(index).y());
+            normalFB.put(normals.get(index).z());
+        }
+        vertexFB.flip();
     }
 
     public ImportedMesh(AIMesh aiMesh) {
@@ -89,6 +104,6 @@ public class ImportedMesh implements IMesh {
     }
 
     public int getNumVertices() {
-        return fb.capacity();
+        return vertexFB.capacity();
     }
 }

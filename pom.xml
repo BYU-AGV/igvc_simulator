@@ -455,17 +455,17 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>io.github.java-graphics</groupId>
-            <artifactId>glm</artifactId>
-            <version>1.0.1</version>d
-        </dependency>
-
 
         <dependency>
             <groupId>org.joml</groupId>
             <artifactId>joml</artifactId>
             <version>1.9.13</version>
+        </dependency>
+
+        <dependency>
+            <groupId>cz.advel.jbullet</groupId>
+            <artifactId>jbullet</artifactId>
+            <version>20101010-1</version>
         </dependency>
     </dependencies>
 

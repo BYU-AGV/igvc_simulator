@@ -45,6 +45,7 @@ public class Simulator implements IWorld {
             }
         });
         importedModel = AssimpModelLoader.loadModel("src/main/resources/magnet/magnet.obj");
+//        importedModel = AssimpModelLoader.loadModel("src/main/resources/magnet/magnet.obj");
         importedModel.compile();
     }
 

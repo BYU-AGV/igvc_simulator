@@ -16,7 +16,7 @@ public class Main {
         initLogger();
         Logger.fine("Setup logger");
         Main main = new Main();
-        main.color = new Color(0x283593);
+        main.color = new Color(0x3E3C5F);
         main.run();
         Logger.flush();
     }
@@ -29,7 +29,7 @@ public class Main {
     }
 
     public void run() {
-        Logger.fine("Hello from LWJGL " + Version.getVersion() + "!");
+        Logger.info("Hello from LWJGL " + Version.getVersion() + "!");
         Simulator simulator = new Simulator();
         simulator.setRenderEngine(new OpenGLRenderingEngine());
         simulator.init();

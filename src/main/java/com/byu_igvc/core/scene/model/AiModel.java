@@ -60,4 +60,8 @@ public class AiModel {
      * Clears the data so we keep things clean
      */
     public void destroy() {aiReleaseImport(scene);}
+
+    public List<Material> getMaterials() {
+        return materials;
+    }
 }

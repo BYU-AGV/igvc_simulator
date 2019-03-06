@@ -8,7 +8,6 @@ import java.io.*;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
-import java.nio.file.Paths;
 
 import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.system.MemoryUtil.*;
@@ -70,7 +69,7 @@ public class AssimpModelLoader {
             throw new IllegalStateException(aiGetErrorString());
         }
 
-        return new AiModel(scene, new Shader("src/main/resources/shaders/vert.glsl", "src/main/resources/shaders/frag.glsl"));
+        return new AiModel(scene, new Shader("src/main/resources/shaders/magnet_vert.glsl", "src/main/resources/shaders/magnet_frag.glsl"));
     }
 
     public static ByteBuffer ioResourceToByteBuffer(String resource, int bufferSize) throws IOException {

@@ -1,9 +1,10 @@
 package com.byu_igvc.core.render;
 
 import com.byu_igvc.logger.Logger;
-import glm.mat._4.Mat4;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
+import org.lwjgl.assimp.AIColor4D;
 
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -58,11 +59,6 @@ public class Shader {
         return programID;
     }
 
-    public static void setUniformMat4(Shader shader, String name, Mat4 mat4) {
-        int location = glGetUniformLocation(shader.getProgramID(), name);
-        glUniformMatrix4fv(location, false, mat4.toFa_());
-    }
-
     public static void setUniformMat4(Shader shader, String name, Matrix4f mat4) {
         int location = glGetUniformLocation(shader.getProgramID(), name);
         FloatBuffer fb = BufferUtils.createFloatBuffer(16);
@@ -73,5 +69,20 @@ public class Shader {
     public static void setUniformMat4(Shader shader, String name, FloatBuffer mat4) {
         int location = glGetUniformLocation(shader.getProgramID(), name);
         glUniformMatrix4fv(location, false, mat4);
+    }
+
+    public static void setUniformVec3(Shader shader, String name, Vector3f vec3) {
+        int location = glGetUniformLocation(shader.getProgramID(), name);
+        glUniform3f(location, vec3.x, vec3.y, vec3.y);
+    }
+
+    public static void setUniformVec3(Shader shader, String name, AIColor4D vec3) {
+        int location = glGetUniformLocation(shader.getProgramID(), name);
+        glUniform3f(location, vec3.r(), vec3.g(), vec3.b());
+    }
+
+    public static void setUniformVec4(Shader shader, String name, AIColor4D color4D) {
+        int location = glGetUniformLocation(shader.getProgramID(), name);
+        glUniform4f(location, color4D.r(), color4D.g(), color4D.b(), color4D.a());
     }
 }
